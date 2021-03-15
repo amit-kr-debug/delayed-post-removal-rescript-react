@@ -41,7 +41,7 @@ var initialState = {
 
 function PostFeed$PostView(Props) {
   var post = Props.post;
-  var dispatch = Props.dispatch;
+  var handleClick = Props.handleClick;
   var postText = Props.postText;
   return React.createElement("div", {
               className: "bg-green-200 hover:bg-green-300 text-gray-800 hover:text-gray-900 px-8 py-4 mb-4 rounded"
@@ -51,18 +51,7 @@ function PostFeed$PostView(Props) {
                   className: "mb-4"
                 }, post.author), Curry._1(postText, post.text), React.createElement("button", {
                   className: "mr-4 mt-4 bg-red-600 hover:bg-red-700 text-white py-2 px-4 ",
-                  onClick: (function (_mouseEvt) {
-                      return Curry._1(dispatch, {
-                                  TAG: /* DeleteLater */0,
-                                  _0: post,
-                                  _1: setTimeout((function (param) {
-                                          return Curry._1(dispatch, {
-                                                      TAG: /* DeleteNow */2,
-                                                      _0: post
-                                                    });
-                                        }), 10000)
-                                });
-                    })
+                  onClick: Curry.__1(handleClick)
                 }, "Remove this post"));
 }
 
@@ -72,8 +61,8 @@ var PostView = {
 
 function PostFeed$DeleteNotificationView(Props) {
   var post = Props.post;
-  var state = Props.state;
-  var dispatch = Props.dispatch;
+  var handleClickRestore = Props.handleClickRestore;
+  var handleClickDeleteImmediate = Props.handleClickDeleteImmediate;
   return React.createElement("div", {
               className: "relative bg-yellow-100 px-8 py-4 mb-4 h-40"
             }, React.createElement("p", {
@@ -82,22 +71,10 @@ function PostFeed$DeleteNotificationView(Props) {
                   className: "flex justify-center"
                 }, React.createElement("button", {
                       className: "mr-4 mt-4 bg-yellow-500 hover:bg-yellow-900 text-white py-2 px-4",
-                      onClick: (function (_mouseEvt) {
-                          clearTimeout(Belt_MapString.getExn(state.forDeletion, post.id));
-                          return Curry._1(dispatch, {
-                                      TAG: /* DeleteAbort */1,
-                                      _0: post
-                                    });
-                        })
+                      onClick: Curry.__1(handleClickRestore)
                     }, "Restore"), React.createElement("button", {
                       className: "mr-4 mt-4 bg-red-600 hover:bg-red-700 text-white py-2 px-4",
-                      onClick: (function (_mouseEvt) {
-                          clearTimeout(Belt_MapString.getExn(state.forDeletion, post.id));
-                          return Curry._1(dispatch, {
-                                      TAG: /* DeleteNow */2,
-                                      _0: post
-                                    });
-                        })
+                      onClick: Curry.__1(handleClickDeleteImmediate)
                     }, "Delete Immediately")), React.createElement("div", {
                   className: "bg-red-600 h-2 w-full absolute top-0 left-0 progress"
                 }));
@@ -113,10 +90,24 @@ function PostFeed(Props) {
   var state = match[0];
   return Belt_Array.map(state.posts, (function (post) {
                 if (Belt_MapString.has(state.forDeletion, post.id)) {
+                  var handleClickRestore = function (_evt) {
+                    clearTimeout(Belt_MapString.getExn(state.forDeletion, post.id));
+                    return Curry._1(dispatch, {
+                                TAG: /* DeleteAbort */1,
+                                _0: post
+                              });
+                  };
+                  var handleClickDeleteImmediate = function (_evt) {
+                    clearTimeout(Belt_MapString.getExn(state.forDeletion, post.id));
+                    return Curry._1(dispatch, {
+                                TAG: /* DeleteNow */2,
+                                _0: post
+                              });
+                  };
                   return React.createElement(PostFeed$DeleteNotificationView, {
                               post: post,
-                              state: state,
-                              dispatch: dispatch,
+                              handleClickRestore: handleClickRestore,
+                              handleClickDeleteImmediate: handleClickDeleteImmediate,
                               key: post.id
                             });
                 }
@@ -127,10 +118,24 @@ function PostFeed(Props) {
                                           }, line);
                               }));
                 };
+                var handleClick = function (_evt) {
+                  var timeoutId = setTimeout((function (param) {
+                          return Curry._1(dispatch, {
+                                      TAG: /* DeleteNow */2,
+                                      _0: post
+                                    });
+                        }), 10000);
+                  return Curry._1(dispatch, {
+                              TAG: /* DeleteLater */0,
+                              _0: post,
+                              _1: timeoutId
+                            });
+                };
                 return React.createElement(PostFeed$PostView, {
                             post: post,
-                            dispatch: dispatch,
-                            postText: postText
+                            handleClick: handleClick,
+                            postText: postText,
+                            key: post.id
                           });
               }));
 }
