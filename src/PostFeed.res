@@ -86,7 +86,7 @@ let make = () => {
 
   let posts = state.posts->Belt.Array.map(post => {
     if state.forDeletion->Belt.Map.String.has(post.id) {
-      <DeleteNotificationView post state dispatch />
+      <DeleteNotificationView post state dispatch key={post.id} />
     } else {
       let postText = text => {
         text->Belt.Array.map(line => <p className="mb-1 text-sm"> {s(line)} </p>)

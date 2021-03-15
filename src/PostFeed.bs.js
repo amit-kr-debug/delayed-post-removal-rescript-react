@@ -116,7 +116,8 @@ function PostFeed(Props) {
                   return React.createElement(PostFeed$DeleteNotificationView, {
                               post: post,
                               state: state,
-                              dispatch: dispatch
+                              dispatch: dispatch,
+                              key: post.id
                             });
                 }
                 var postText = function (text) {
